@@ -1,0 +1,26 @@
+{
+	"name": "CDCShowBugs Extension",
+	"version": "1.0",
+	"description": "Display bugs for this URL.",
+
+	"background": {"scripts":["background.js"]},
+
+	"content_scripts":[
+		{
+			"matches": ["http://*/*", "https://*/*"],
+			"css":[],
+			"js":["jquery.min.js","content_script.js"]
+		}
+	],
+
+	"icons":{
+		"128":"icon_128.png"
+	},
+	
+	"permissions": ["tabs", "debugger", "background", "clipboardWrite", "http://*/*", "https://*/*"],
+
+	"browser_action":	{
+		"default_icon": "icon.png",
+		"popup": "cdcshowbugs.html"		
+	}
+}
