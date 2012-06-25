@@ -5,19 +5,29 @@
 
 	"background": {"scripts":["background.js"]},
 
-	"content_scripts":[
-		{
-			"matches": ["http://*/*", "https://*/*"],
-			"css":[],
-			"js":["jquery.min.js","content_script.js"]
-		}
-	],
+	"content_scripts": [ {
+    	"matches": ["http://*/*", "https://*/*"],
+    	"js": ["content_script.js"],
+    	"all_frames": true,
+    	"run_at": "document_end"
+	}],
+
 
 	"icons":{
 		"128":"icon_128.png"
 	},
-	
-	"permissions": ["tabs", "debugger", "background", "clipboardWrite", "http://*/*", "https://*/*"],
+
+
+	"permissions": [
+		"tabs", 
+		"debugger", 
+		"background", 
+		"clipboardWrite", 
+		"history",
+		"http://*/*", 
+		"https://*/*"
+	],
+
 
 	"browser_action":	{
 		"default_icon": "icon.png",
