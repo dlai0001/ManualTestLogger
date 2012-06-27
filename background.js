@@ -7,10 +7,11 @@ function getTabTestLogKey(tabId) {
 	return 'testlog_' + tabId;
 }
 
-// When Url changes
-chrome.tabs.onUpdated.addListener(function(tabId, props) {
 
-});
+
+function logTestStep(tabId, text) {
+	localStorage[getTabTestLogKey(tabId)] += "* " + text + "\n";
+}
 
 
 // When an tab is activated check to make sure we have a testlog_ entry for it.
@@ -40,61 +41,54 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 });
 
 
-//When user navigates to a new URL that's not a form action or a link, 
-// we'll reset the test steps.
-chrome.history.onVisited.addListener(function(historyItem) {
-	//find out how this visit was performed.
-	var historyId = historyItem.id;
-	
-	//figure out what the most recent visit item is.
-	chrome.history.getVisits({url: historyItem.url}, function(visitItems) {
-		var mostResentVisitItem = visitItems[0];
-	    for (var i = 0, ie = visitItems.length; i < ie; ++i) {
-	      	// Keep track of the most recent visit time.  It should match historyItem.lastVisitTime.
-	      	if (mostResentVisitItem.visitTime < visitItems[i].visitTime) {
-				mostResentVisitItem = visitItems[i];
-	      	}
-	    }
+chrome.webNavigation.onCommitted.addListener(function(details) {
+	var transitionType = details.transitionType;
+	var transitionQualifiers = details.transitionQualifiers;
+	console.log("webNav::transitonType:" + transitionType + " qualifiers: " + transitionQualifiers);
 
-	    //check how this visit was performed.
-	    var transition = mostResentVisitItem.transition;
-	    switch(transition) {
+	if( transitionQualifiers.indexOf("forward_back") >= 0 ) {
+		console.log("back or forward was hit");
+		logTestStep(details.tabId, "Hit the back/forward button.");
+	} else {
+
+	 	switch(transitionType) {
 	    	case "typed":
 	    	case "auto_bookmark":
 	    	case "generated":
 	    	case "start_page":
 	    	case "keyword":
 	    	case "keyword_generated":
+
 	    		//Reset our log if URL is typed or bookmarked
 	    		console.log("Page visit from a source that's not a link click or form submit. " 
-	    			+ transition);
+	    			+ transitionType);
 	    		
 				console.log("resetting step history, typed url");
-				localStorage[getTabTestLogKey(localStorage["currentTabId"])] = 
-					"* Navigate to: " + historyItem.url + "\n";
+				localStorage[getTabTestLogKey(details.tabId)] = "";
+				logTestStep(details.tabId, "Navigate to: " + details.url);
 				
 				
 	    		break;
 	    	case "reload":
-	    		chrome.tabs.getCurrent(function(tab) {
-	    			if( typeof(tab) != 'undefined' && typeof(tab.id) != 'undefined' ) {
-	    				console.log("resetting step history, reload");
-						localStorage[getTabTestLogKey(tab.id)] += "* Reload the page.\n";
-					}
-				});
+				console.log("resetting step history, reload");
+				logTestStep(details.tabId, "Reload the page.");
 				break;
 	    	default:
-	    		//do nothing
+	    		//other wise do nothing.
 	    }
-	});
+	}
+
 });
+
+
 
 //Listen for things to log that's passed in from the content script.
 chrome.extension.onRequest.addListener(
   function(request, sender, sendResponse) {
+  	console.log("Received request:" + request.type + ":" + request.content);
     var tabId = sender.tab.id;
-    if (request.type == "recordBrowserAction") {
-    	// do somethign to log the action.
-    	console.log(request.action);
+    if (request.type == "recordBrowserAction") {   	
+    	console.log(request.content);
+    	logTestStep(tabId, request.content);
     }
 });

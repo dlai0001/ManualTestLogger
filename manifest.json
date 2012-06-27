@@ -3,11 +3,11 @@
 	"version": "1.0",
 	"description": "Display bugs for this URL.",
 
-	"background": {"scripts":["background.js"]},
+	"background": {"scripts":["background.js", "jquery.min.js"]},
 
 	"content_scripts": [ {
     	"matches": ["http://*/*", "https://*/*"],
-    	"js": ["content_script.js"],
+    	"js": ["content_script.js", "jquery.min.js"],
     	"all_frames": true,
     	"run_at": "document_end"
 	}],
@@ -23,6 +23,8 @@
 		"debugger", 
 		"background", 
 		"clipboardWrite", 
+		"notifications",
+		"webNavigation",
 		"history",
 		"http://*/*", 
 		"https://*/*"
