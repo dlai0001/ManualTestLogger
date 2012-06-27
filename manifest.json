@@ -1,7 +1,7 @@
 {
-	"name": "CDCShowBugs Extension",
-	"version": "1.0",
-	"description": "Display bugs for this URL.",
+	"name": "Manual Test Logger",
+	"version": "0.5",
+	"description": "Displays a test log of manual steps.",
 
 	"background": {"scripts":["background.js", "jquery.min.js"]},
 
@@ -33,6 +33,6 @@
 
 	"browser_action":	{
 		"default_icon": "icon.png",
-		"popup": "cdcshowbugs.html"		
+		"popup": "manual-test-logger.html"		
 	}
 }
