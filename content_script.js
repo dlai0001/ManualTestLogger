@@ -38,14 +38,31 @@ function handleClickLink(linkObj) {
 	});
 }
 
+function isThereParentLink(targetObj) {	
+	if(typeof(targetObj.parentNode) != 'undefined') {
+		
+		if(targetObj.parentNode.nodeName == "A" && targetObj.parentNode.nodeName == "a") {
+			return true;
+		} else {
+			//recursive call to check the next parent.
+			return isThereParentLink(targetObj.parentNode);
+		}
+	}
+	return false;
+}
 
 //Add a doucment level listener for click events.
 document.onclick = function(clickEvent) {
 	
 	switch(clickEvent.target.nodeName) {
 		case "A":			
+		case "a":
 			handleClickLink(clickEvent.target);
 			break;
+		default:			
+			if( isThereParentLink(clickEvent.target) ) {
+				handleClickLink(clickEvent.target);
+			}
 	}
 	
 };
