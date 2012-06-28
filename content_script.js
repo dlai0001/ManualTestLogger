@@ -32,16 +32,23 @@ function getXPath( element ) {
 
 function handleClickLink(linkObj) {
 	console.log("clicked link");
-	chrome.extension.sendRequest({
-		type: "recordBrowserAction", 
-		content: "Click on link '" + linkObj.textContent + "'"
-	});
+	if( isLinkNavigation(linkObj)) {
+		chrome.extension.sendRequest({
+			type: "recordBrowserAction", 
+			content: "Click on navigation item '" + linkObj.textContent + "'"
+		});
+	} else {
+		chrome.extension.sendRequest({
+			type: "recordBrowserAction", 
+			content: "Click on link '" + linkObj.textContent + "'"
+		});
+	}
 }
 
 function isThereParentLink(targetObj) {	
-	if(typeof(targetObj.parentNode) != 'undefined') {
+	if(typeof(targetObj.parentNode) != 'undefined' && targetObj.parentNode instanceof HTMLElement) {
 		
-		if(targetObj.parentNode.nodeName == "A" && targetObj.parentNode.nodeName == "a") {
+		if(targetObj.parentNode.nodeName == "A" || targetObj.parentNode.nodeName == "a") {
 			return true;
 		} else {
 			//recursive call to check the next parent.
@@ -51,16 +58,32 @@ function isThereParentLink(targetObj) {
 	return false;
 }
 
+function isLinkNavigation(targetObj) {
+	var idContainsNavigation = targetObj.id.match(/[nN]((av[^a-z])|(avigation))/) != null;
+	var classContainsNavigation = targetObj.className.match(/[nN]((av[^a-z])|(avigation))/) != null;
+	if( idContainsNavigation || classContainsNavigation) {
+		return true;
+	}
+
+	if(typeof(targetObj.parentNode) != 'undefined' && targetObj.parentNode instanceof HTMLElement) {
+		return isLinkNavigation(targetObj.parentNode);
+	}
+	return false;
+	
+}
+
 //Add a doucment level listener for click events.
 document.onclick = function(clickEvent) {
+	console.log("click event " + clickEvent.target);
 	
 	switch(clickEvent.target.nodeName) {
 		case "A":			
 		case "a":
 			handleClickLink(clickEvent.target);
 			break;
-		default:			
-			if( isThereParentLink(clickEvent.target) ) {
+		default:		
+			var parentLinkExist = isThereParentLink(clickEvent.target);
+			if( parentLinkExist ) {
 				handleClickLink(clickEvent.target);
 			}
 	}
