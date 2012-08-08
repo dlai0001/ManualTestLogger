@@ -69,8 +69,22 @@ function isLinkNavigation(targetObj) {
 		return isLinkNavigation(targetObj.parentNode);
 	}
 	return false;
-	
 }
+
+
+function getMouseOverHandler(targetObj) {
+	
+	if( typeof(targetObj.onmouseover) != 'undefined' && targetObj.onmouseover != null ) {
+		return targetObj.onmouseover;
+	}
+
+	if(typeof(targetObj.parentNode) != 'undefined' && targetObj.parentNode instanceof HTMLElement) {
+		return getMouseOverHandler(targetObj.parentNode);
+	}
+	return null;
+}
+
+
 
 //Add a doucment level listener for click events.
 document.onclick = function(clickEvent) {
@@ -135,6 +149,13 @@ document.onchange = function(changeEvent) {
 	}
 }
 
+ var lastElementHovered;
+ document.onmouseover = function(mouseEvent) {
+ 	lastElementHovered = mouseEvent.srcElement;
+ }
+
+
+
 //Add listener for form inputs.
 document.onsubmit = function(changeEvent) {
 	chrome.extension.sendRequest({
@@ -149,3 +170,21 @@ function logTestStep(text) {
 		content: text
 	});
 }
+
+//Trigger when a div appears (to detect hover overs)
+$('div').each(function() {
+	console.log("========================================");
+	if(!$(this).is(':visible')) {
+		//add a listener to check when this element becomes visible.
+		console.log("hidden div detected:" + $(this));
+		$(this).watch('display', function(e) {
+			if($(this).is(':visible')) {
+				//log a hover over on the last element triggering the div to appear.
+				console.log("Hover over " + $(lastElementHovered).text());
+				logTestStep("Hover mouse over element " + $(lastElementHovered).text() );
+			}
+		});
+		console.log("change listener added....");
+	}
+}); 
+

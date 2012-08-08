@@ -2,12 +2,13 @@
 	"name": "Manual Test Logger",
 	"version": "0.5",
 	"description": "Displays a test log of manual steps.",
+	"manifest_version":2,
 
 	"background": {"scripts":["background.js", "jquery.min.js"]},
 
 	"content_scripts": [ {
     	"matches": ["http://*/*", "https://*/*"],
-    	"js": ["content_script.js", "jquery.min.js"],
+    	"js": ["jquery.min.js", "jquery.watch.js", "content_script.js"],
     	"all_frames": true,
     	"run_at": "document_end"
 	}],
@@ -33,6 +34,7 @@
 
 	"browser_action":	{
 		"default_icon": "icon.png",
-		"popup": "manual-test-logger.html"		
+		"default_title": "Manual Test Logger",
+		"default_popup": "manual-test-logger.html"		
 	}
 }
